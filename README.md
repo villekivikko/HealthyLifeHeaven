@@ -1,1 +1,1 @@
-# HealthyLifeHeaven - gym workout API
+# gym workout API
