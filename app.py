@@ -154,3 +154,4 @@ def db_test():
 
 app.cli.add_command(init_db_command)
 app.cli.add_command(db_test)
+print("GitHub test")
