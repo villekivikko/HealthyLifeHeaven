@@ -6,8 +6,8 @@ External libraries:
   - flask
   - flask-sqlalchemy
 
-How to install dependencies:
-  - run: pip freeze > requirements.txt
+How to install dependencies (assuming pip is installed):
+  - run: pip install -r requirements.txt
 
 Used database: SQLAlchemy (1.4.46) => SQLite
 
