@@ -18,16 +18,13 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 
 class User(db.Model):
     id = db.Column(db.Integer, unique=True, primary_key=True, autoincrement=True)
-    username = db.Column(db.String(64), nullable = False)
+    username = db.Column(db.String(64), nullable = False, unique=True)
     height = db.Column(db.Float, nullable=False)
     weight = db.Column(db.Float, nullable=False)
     bmi = db.Column(db.Float, nullable=True)
     mean_bmi = db.Column(db.Float, nullable=True)
     
-    workout = db.relationship('Workout', back_populates='user')
-
-    def bmi(self):
-        return self.weight / (self.height ** 2)
+    workout = db.relationship('Workout', cascade="all,delete", back_populates='user')
 
 class Workout(db.Model):
     id = db.Column(db.Integer, unique=True, primary_key=True, autoincrement=True)
@@ -35,7 +32,7 @@ class Workout(db.Model):
     workout_name = db.Column(db.String(64), unique=True, nullable=False)
     favorite = db.Column(db.Boolean, nullable=False)
 
-    movement = db.relationship('Movement', back_populates='workout')
+    movement = db.relationship('Movement', cascade="all,delete", back_populates='workout')
     user = db.relationship('User', back_populates='workout')
 
 class Movement(db.Model):
@@ -86,6 +83,11 @@ def db_test():
         workout_name="test-workout2",
         favorite=False
     )
+    w3 = Workout(
+        user_id = 1,
+        workout_name="test-workout3",
+        favorite=False
+    )
     m1 = Movement(
         movement_name="test-movement1",
         workout_id=1,
@@ -109,13 +111,14 @@ def db_test():
     db.session.add(u2)
     db.session.add(w1)
     db.session.add(w2)
+    db.session.add(w3)
     db.session.add(m1)
     db.session.add(m2)   
     db.session.add(m3)
     db.session.commit()
    
     # Check that everything exists
-    assert Workout.query.count() == 2
+    assert Workout.query.count() == 3
     assert User.query.count() == 2
     assert Movement.query.count() == 3
    
@@ -136,21 +139,33 @@ def db_test():
     assert db_movement in db_workout.movement
     assert db_workout in db_user.workout
 
-    # Check that ONDELETE updates the pointed value correctly
-    assert Workout.query.filter_by(workout_name="test-workout1").first().user_id == 1    # 1 before deleting User 1
-    db.session.delete(u1)
+    # Check that ONDELETE updates/deletes the pointed value correctly
+    assert Workout.query.filter_by(workout_name="test-workout1").first().id == 1 # 1 before deleting Movement 1
+    db.session.delete(m2)
     db.session.commit()
-    assert Workout.query.filter_by(workout_name="test-workout1").first().user_id == None    # None after deleting User 1
-
-    assert Movement.query.filter_by(movement_name="test-movement2").first().workout_id == 2 # 2 before deleting Workout 1
+    assert Workout.query.filter_by(workout_name="test-workout1").first().id == 1 # 1, Workout should not be deleted after deleting movement
+    
+    assert Movement.query.filter_by(movement_name="test-movement1").first() != None # Movement should exist before deletion of workout
+    db.session.delete(w1)
+    db.session.commit()
+    assert Movement.query.filter_by(movement_name="test-movement1").first() == None # Movement associated with workout should be None after deletion
+    
+    assert User.query.filter_by(username="test_user1").first().id == 1 # 1 before deleting user's workout
     db.session.delete(w2)
     db.session.commit()
-    assert Movement.query.filter_by(movement_name="test-movement2").first().workout_id == None # None after deleting Workout 1
+    assert User.query.filter_by(username="test_user1").first().id == 1 # 1 user should not be deleted after deleting workout of the user
+   
+    assert Workout.query.filter_by(workout_name="test-workout3").first() != None # Workout should exist before deletion of the user
+    db.session.delete(u1)
+    db.session.commit()
+    assert Workout.query.filter_by(workout_name="test-workout3").first() == None # Workout should be None after deletion of the user
+    
+    
+    # All movements, All workouts, and User 1 should be deleted in the previous section, check that model counts have been updated correctly
+    assert Workout.query.count() == 0
+    assert User.query.count() == 1
+    assert Movement.query.count() == 0
 
-    # Workout 1 and User 1 deleted in the previous section, check that model counts have been updated correctly
-    assert Workout.query.count() == 1   # 2 - 1
-    assert User.query.count() == 1      # 2 - 1
-    assert Movement.query.count() == 3  # 3
 
 app.cli.add_command(init_db_command)
 app.cli.add_command(db_test)
