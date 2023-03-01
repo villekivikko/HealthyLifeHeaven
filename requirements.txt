@@ -1,2 +1,6 @@
 pip install flask
 pip install flask-sqlalchemy
+
+# For the testing environments
+pip install pytest
+pip install pytest-cov
