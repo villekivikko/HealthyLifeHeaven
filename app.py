@@ -35,12 +35,6 @@ class User(db.Model):
     mean_bmi = db.Column(db.Float, nullable=True)
     
     workout = db.relationship('Workout', cascade="all,delete", back_populates='user')
-
-    """
-    def calc_user_bmi(self):
-        user_bmi = self.weight/((self.height/100)**2)
-        return user_bmi
-    """
     
     def serialize(self):
         return {
@@ -82,21 +76,78 @@ class User(db.Model):
     
 class Workout(db.Model):
     id = db.Column(db.Integer, unique=True, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
     workout_name = db.Column(db.String(64), unique=True, nullable=False)
     favorite = db.Column(db.Boolean, nullable=False)
 
     movement = db.relationship('Movement', cascade="all,delete", back_populates='workout')
     user = db.relationship('User', back_populates='workout')
+    
+    def serialize(self):
+        return {
+            "user_id": self.user_id,
+            "workout_name": self.workout_name,
+            "favorite": self.favorite
+        }
+    
+    def deserialize(self, doc):
+        self.workout_name = doc.get("workout_name")
+        self.favorite = doc.get("favorite")
 
+    @staticmethod
+    def json_schema():
+        schema = {
+            "type": "object",
+            "required": ["workout_name", "favorite"]
+        }
+        props = schema["properties"] = {}
+        props["workout_name"] = {
+            "description": "Name of the workout",
+            "type": "string"
+        }
+        props["favorite"] = {
+            "description": "Workout is either user's favorite or not",
+            "type": "boolean"
+        }
+        return schema
+    
 class Movement(db.Model):
     id = db.Column(db.Integer, unique=True, primary_key=True, autoincrement=True)
-    workout_id = db.Column(db.Integer, db.ForeignKey('workout.id'), nullable = True)
+    workout_id = db.Column(db.Integer, db.ForeignKey('workout.id'), nullable = False)
     movement_name = db.Column(db.String(64), nullable=False)
     sets = db.Column(db.Float, nullable=False)
     reps = db.Column(db.Float, nullable=False)
 
     workout = db.relationship('Workout', back_populates='movement')
+    
+    def serialize(self):
+        return {
+            "workout_id": self.workout_id,
+            "movement_name": self.movement_name,
+            "sets": self.sets,
+            "reps": self.reps
+        }
+    
+    @staticmethod
+    def json_schema():
+        schema = {
+            "type": "object",
+            "required": ["movement_name", "sets", "reps"]
+        }
+        props = schema["properties"] = {}
+        props["movement_name"] = {
+            "description": "Name of the movement",
+            "type": "string"
+        }
+        props["sets"] = {
+            "description": "The number of sets",
+            "type": "integer"
+        }
+        props["reps"] = {
+            "description": "The number of repetitions",
+            "type": "integer"
+        }
+        return schema
         
 
 
@@ -115,7 +166,7 @@ class UserCollection(Resource):
 
     def post(self):
         if not request.json:
-            raise UnsupportedMediaType
+            raise UnsupportedMediaType(description="Wrong media type, use JSON")
     
         # validation
         try:
@@ -173,39 +224,131 @@ class UserItem(Resource):
             raise BadRequest(description=str(e))
         
         return "Success", 201
-    
-
 
 
 class WorkoutCollection(Resource):
-    def get(self):
-        pass
+    def get(self, user):
+        workouts = Workout.query.filter_by(user_id=user.id).all() 
+        response_data = []
+        while workouts:
+            workout = workouts.pop()
+            response_data.append(workout.serialize())
+        return Response(json.dumps(response_data), 200)
 
-    def post(self):
-        pass    
+    def post(self, user):
+        if not request.json:
+            raise UnsupportedMediaType(description="Wrong media type, use JSON")
+        
+        # validation
+        try:
+            validate(request.json, Workout.json_schema(), format_checker=draft7_format_checker)
+        except ValidationError as e:
+            raise BadRequest(description=str(e))
+        
+        # create a new workout
+        workout = Workout()
+        workout.deserialize(request.json)
+        workout.user_id = user.id
+
+        try:
+            db.session.add(workout)
+            db.session.commit()
+        except IntegrityError:
+            raise Conflict(description="Workout name already in use")
+        return "Success", 201 
+
 
 
 class WorkoutItem(Resource):
-    def get(self):
-        pass
+    def get(self, user, workout):
+        return workout.serialize()
+    
+    def put(self, user, workout):
+        if not workout:
+            raise NotFound(description="The workout not found")
+        if not request.json:
+            raise UnsupportedMediaType(description="Wrong media type, use JSON")
+        
+        # validation
+        try:
+            validate(request.json, Workout.json_schema(), format_checker=draft7_format_checker)
+        except ValidationError as e:
+            raise BadRequest(description=str(e))
+        
+        # modify existing user information
+        workout.deserialize(request.json)
 
-    def put(self):
-        pass
+        try:
+            db.session.commit()
+        except Exception as e:
+            raise BadRequest(description=str(e))
+        return "Success", 201 
 
-    def post(self):
-        pass    
+    def post(self, user, workout):
+        if not request.json:
+            raise UnsupportedMediaType(description="Wrong media type, use JSON")
+    
+        # validation
+        try:
+            validate(request.json, Movement.json_schema(), format_checker=draft7_format_checker)
+        except ValidationError as e:
+            raise BadRequest(description=str(e))
 
-    def delete(self):
-        pass    
+        # create a new movement
+        movement = Movement()
+        movement.workout_id = workout.id
+        movement.sets = request.json["sets"]
+        movement.reps = request.json["reps"]
+        movement.movement_name = request.json["movement_name"]
+        
+        # movement name has to be unique within the workout, else raise error
+        movements_in_workout = Movement.query.filter_by(workout_id=workout.id).all()
+        for item in movements_in_workout:
+            if item.movement_name == request.json["movement_name"]:
+                raise Conflict(description="Movement name already in use")
+
+        try:
+            db.session.add(movement)
+            db.session.commit()
+        except Exception as e:
+            raise BadRequest(description=str(e))
+        
+        return "Success", 201
+
+    def delete(self, user, workout):
+        workout = Workout.query.filter_by(workout_name=workout.workout_name).first()
+        if not workout:
+            raise NotFound(description="The workout not found")
+
+        try:
+            db.session.delete(workout)
+            db.session.commit()
+        except Exception as e:
+            raise BadRequest(description=str(e))
+        
+        return "Success", 201
 
 
 class MovementItem(Resource):
-    def get(self):
-        pass
-  
-    def delete(self):
-        pass    
+    def get(self, user, workout, movement):
+        movement = Movement.query.filter_by(movement_name=movement, workout_id=workout.id).first()
+        if not movement:
+            raise NotFound(description="The movement not found")
+        return movement.serialize()
+    
+    def delete(self, user, workout, movement):
+        
+        movement = Movement.query.filter_by(movement_name=movement, workout_id=workout.id).first()
+        if not movement:
+            raise NotFound(description="The movement not found")
 
+        try:
+            db.session.delete(movement)
+            db.session.commit()
+        except Exception as e:
+            raise BadRequest(description=str(e))
+        
+        return "Success", 201
 
 #######################################################################################
 # Other functions/classes                                     
@@ -243,7 +386,7 @@ app.url_map.converters["workout"] = WorkoutConverter
 api.add_resource(UserCollection, "/api/users/")
 api.add_resource(UserItem, "/api/users/<user:user>/")
 api.add_resource(WorkoutCollection, "/api/users/<user:user>/workouts/")
-api.add_resource(WorkoutItem, "/api/users/<user:user>/workouts/<workout>/")
+api.add_resource(WorkoutItem, "/api/users/<user:user>/workouts/<workout:workout>/")
 api.add_resource(MovementItem, "/api/users/<user:user>/workouts/<workout:workout>/<movement>/")
 
 
