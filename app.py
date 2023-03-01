@@ -1,14 +1,21 @@
-from flask import Flask
+import json
+from flask import Flask, request, Response
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.engine import Engine
 from sqlalchemy import event
 import click
 from flask.cli import with_appcontext
+from flask_restful import Api, Resource
+from werkzeug.routing import BaseConverter
+from jsonschema import validate, ValidationError, draft7_format_checker
+from werkzeug.exceptions import NotFound, BadRequest, Conflict, UnsupportedMediaType, InternalServerError
+from sqlalchemy.exc import IntegrityError
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///test.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
+api = Api(app)
 
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
@@ -16,6 +23,9 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()
 
+#######################################################################################
+# Database models                                       
+#######################################################################################
 class User(db.Model):
     id = db.Column(db.Integer, unique=True, primary_key=True, autoincrement=True)
     username = db.Column(db.String(64), nullable = False, unique=True)
@@ -26,6 +36,50 @@ class User(db.Model):
     
     workout = db.relationship('Workout', cascade="all,delete", back_populates='user')
 
+    """
+    def calc_user_bmi(self):
+        user_bmi = self.weight/((self.height/100)**2)
+        return user_bmi
+    """
+    
+    def serialize(self):
+        return {
+            "username": self.username,
+            "height": self.height,
+            "weight": self.weight,
+            "bmi": self.bmi,
+            "mean_bmi": self.mean_bmi
+        }
+    
+    def deserialize(self, doc):
+        self.username = doc.get("username")
+        self.height = doc.get("height")
+        self.weight = doc.get("weight")
+
+        #calculate bmi for the user
+        self.bmi = self.weight/((self.height/100)**2)
+
+    @staticmethod
+    def json_schema():
+        schema = {
+            "type": "object",
+            "required": ["username", "height", "weight"]
+        }
+        props = schema["properties"] = {}
+        props["username"] = {
+            "description": "User's username",
+            "type": "string"
+        }
+        props["height"] = {
+            "description": "Height of the user",
+            "type": "number"
+        }
+        props["weight"] = {
+            "description": "Weight of the user",
+            "type": "number"
+        }
+        return schema
+    
 class Workout(db.Model):
     id = db.Column(db.Integer, unique=True, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = True)
@@ -45,6 +99,158 @@ class Movement(db.Model):
     workout = db.relationship('Workout', back_populates='movement')
         
 
+
+#######################################################################################
+# Resources                                       
+#######################################################################################
+class UserCollection(Resource):
+    
+    def get(self):
+        users = User.query.all() 
+        response_data = []
+        while users:
+            user = users.pop()
+            response_data.append(user.serialize())
+        return Response(json.dumps(response_data), 200)
+
+    def post(self):
+        if not request.json:
+            raise UnsupportedMediaType
+    
+        # validation
+        try:
+            validate(request.json, User.json_schema(), format_checker=draft7_format_checker)
+        except ValidationError as e:
+            raise BadRequest(description=str(e))
+
+        # create a new user
+        user = User()
+        user.deserialize(request.json)
+
+        try:
+            db.session.add(user)
+            db.session.commit()
+        except IntegrityError:
+            raise Conflict(description="Username already in use")
+        return "Success", 201
+
+
+class UserItem(Resource):
+    def get(self, user):
+        return user.serialize()
+
+    def put(self, user):
+        if not user:
+            raise NotFound(description="The user not found")
+        if not request.json:
+            raise UnsupportedMediaType(description="Wrong media type, use JSON")
+        
+        # validation
+        try:
+            validate(request.json, User.json_schema(), format_checker=draft7_format_checker)
+        except ValidationError as e:
+            raise BadRequest(description=str(e))
+        
+        # modify existing user information
+        user.deserialize(request.json)
+        
+        try:
+            db.session.commit()
+        except Exception as e:
+            raise BadRequest(description=str(e))
+        
+        return "Success", 201
+
+    def delete(self, user):
+        user = User.query.filter_by(username=user.username).first()
+        if not user:
+            raise NotFound(description="The user not found")
+
+        try:
+            db.session.delete(user)
+            db.session.commit()
+        except Exception as e:
+            raise BadRequest(description=str(e))
+        
+        return "Success", 201
+    
+
+
+
+class WorkoutCollection(Resource):
+    def get(self):
+        pass
+
+    def post(self):
+        pass    
+
+
+class WorkoutItem(Resource):
+    def get(self):
+        pass
+
+    def put(self):
+        pass
+
+    def post(self):
+        pass    
+
+    def delete(self):
+        pass    
+
+
+class MovementItem(Resource):
+    def get(self):
+        pass
+  
+    def delete(self):
+        pass    
+
+
+#######################################################################################
+# Other functions/classes                                     
+#######################################################################################
+class UserConverter(BaseConverter):
+
+    def to_python(self, name):
+        user = User.query.filter_by(username=name).first()
+        if user is None:
+            raise NotFound
+        return user
+    
+    def to_url(self, value):
+        if type(value) != User:
+            raise NotFound
+        return value.username
+    
+class WorkoutConverter(BaseConverter):
+
+    def to_python(self, value):
+        workout = Workout.query.filter_by(workout_name=value).first()
+        if workout is None:
+            raise NotFound
+        return workout
+    
+    def to_url(self, value):
+        if type(value) != Workout:
+            raise NotFound
+        return value.workout_name
+
+
+
+app.url_map.converters["user"] = UserConverter
+app.url_map.converters["workout"] = WorkoutConverter
+api.add_resource(UserCollection, "/api/users/")
+api.add_resource(UserItem, "/api/users/<user:user>/")
+api.add_resource(WorkoutCollection, "/api/users/<user:user>/workouts/")
+api.add_resource(WorkoutItem, "/api/users/<user:user>/workouts/<workout>/")
+api.add_resource(MovementItem, "/api/users/<user:user>/workouts/<workout:workout>/<movement>/")
+
+
+
+#######################################################################################
+# Database testing                                     
+#######################################################################################
 @click.command("init_db")
 @with_appcontext
 def init_db_command():
@@ -165,6 +371,8 @@ def db_test():
     assert Workout.query.count() == 0
     assert User.query.count() == 1
     assert Movement.query.count() == 0
+
+
 
 
 app.cli.add_command(init_db_command)
