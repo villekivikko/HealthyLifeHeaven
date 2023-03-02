@@ -134,7 +134,7 @@ class Movement(db.Model):
 def init_db_command():
 
     import os
-    file_path = "test.db"
+    file_path = "gymworkoutapi/test.db"
     if os.path.isfile(file_path):
       os.remove(file_path)
       print("Previous database file has been deleted, new created successfully")
@@ -245,8 +245,11 @@ def db_test():
     db.session.commit()
     assert Workout.query.filter_by(workout_name="test-workout3").first() == None # Workout should be None after deletion of the user
     
+    db.session.delete(u2)
+    db.session.commit()
     
-    # All movements, All workouts, and User 1 should be deleted in the previous section, check that model counts have been updated correctly
+    # All movements, All workouts, and all workouts should be deleted in the previous section, check that model counts have been updated correctly
     assert Workout.query.count() == 0
-    assert User.query.count() == 1
+    assert User.query.count() == 0
     assert Movement.query.count() == 0
+    
