@@ -1,5 +1,7 @@
 """
 REFERENCE: https://github.com/enkwolf/pwp-course-sensorhub-api-example/blob/master/tests/resource_test.py
+           AND
+           https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/testing-flask-applications-part-2/
 """
 import os
 import json
@@ -80,16 +82,17 @@ class TestUserCollection(object):
         resp = client.get(self.RESOURCE_URL)
         assert resp.status_code == 200
         body = json.loads(resp.data)
-        assert len(body["items"]) == 3
-        for item in body["items"]:
+        assert len(body) == 3
+        for item in body:
             assert "username" in item
             assert "height" in item
             assert "weight" in item
 
     def test_post(self, client):
         pass
-        
-        
+
+
+
 class TestUserItem(object):
     """
     This class implements tests for each HTTP method in TestUserItem resource. 
