@@ -129,12 +129,13 @@ class Movement(db.Model):
         return schema
 
 
+
 @click.command("init_db")
 @with_appcontext
 def init_db_command():
 
     import os
-    file_path = "gymworkoutapi/test.db"
+    file_path = "instance/development.db"
     if os.path.isfile(file_path):
       os.remove(file_path)
       print("Previous database file has been deleted, new created successfully")
@@ -251,5 +252,6 @@ def db_test():
     # All movements, All workouts, and all workouts should be deleted in the previous section, check that model counts have been updated correctly
     assert Workout.query.count() == 0
     assert User.query.count() == 0
-    assert Movement.query.count() == 0
+    assert Movement.query.count() == 0 
     
+    db.session.close()

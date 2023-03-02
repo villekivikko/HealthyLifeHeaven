@@ -2,6 +2,7 @@
 REFERENCE: https://github.com/enkwolf/pwp-course-sensorhub-api-example/blob/master/tests/resource_test.py
 """
 import os
+import json
 import pytest
 import tempfile
 import random
@@ -20,6 +21,7 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 @pytest.fixture
 def client():
     db_fd, db_fname = tempfile.mkstemp()
+
     config = {
         "SQLALCHEMY_DATABASE_URI": "sqlite:///" + db_fname,
         "TESTING": True
@@ -34,7 +36,7 @@ def client():
     yield app.test_client()
 
     os.close(db_fd)
-    os.unlink(db_fname)
+    #os.unlink(db_fname)
 
 
 def _populate_db():
@@ -72,9 +74,18 @@ class TestUserCollection(object):
     """
     This class implements tests for each HTTP method in UserCollection resource. 
     """
+    RESOURCE_URL = "/api/users/"
+
     def test_get(self, client):
-        pass
-    
+        resp = client.get(self.RESOURCE_URL)
+        assert resp.status_code == 200
+        body = json.loads(resp.data)
+        assert len(body["items"]) == 3
+        for item in body["items"]:
+            assert "username" in item
+            assert "height" in item
+            assert "weight" in item
+
     def test_post(self, client):
         pass
         

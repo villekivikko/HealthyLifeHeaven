@@ -5,22 +5,16 @@ REFERENCE: https://github.com/enkwolf/pwp-course-sensorhub-api-example/blob/mast
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.engine import Engine
-from sqlalchemy import event
 
 db = SQLAlchemy()
 
 def create_app(test_config=None):
 
     app = Flask(__name__, instance_relative_config=True)
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///test.db"
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-    @event.listens_for(Engine, "connect")
-    def set_sqlite_pragma(dbapi_connection, connection_record):
-        cursor = dbapi_connection.cursor()
-        cursor.execute("PRAGMA foreign_keys=ON")
-        cursor.close()
+    app.config.from_mapping(
+            SQLALCHEMY_DATABASE_URI="sqlite:///" + os.path.join(app.instance_path, "development.db"),
+            SQLALCHEMY_TRACK_MODIFICATIONS=False
+        )
 
     if test_config is None:
         app.config.from_pyfile("config.py", silent=True)

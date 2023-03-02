@@ -1,7 +1,7 @@
 import json
 from flask import request, Response
 from flask_restful import Resource
-from jsonschema import validate, ValidationError, draft7_format_checker
+from jsonschema import validate, ValidationError
 from werkzeug.exceptions import NotFound, BadRequest, Conflict, UnsupportedMediaType
 from sqlalchemy.exc import IntegrityError
 from gymworkoutapi import db
@@ -22,7 +22,7 @@ class UserCollection(Resource):
     
         # validation
         try:
-            validate(request.json, User.json_schema(), format_checker=draft7_format_checker)
+            validate(request.json, User.json_schema())
         except ValidationError as e:
             raise BadRequest(description=str(e))
 
@@ -50,7 +50,7 @@ class UserItem(Resource):
         
         # validation
         try:
-            validate(request.json, User.json_schema(), format_checker=draft7_format_checker)
+            validate(request.json, User.json_schema())
         except ValidationError as e:
             raise BadRequest(description=str(e))
         

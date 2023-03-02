@@ -5,8 +5,8 @@ REFERENCE: https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/
 import json
 from flask import request, Response
 from flask_restful import Resource
-from jsonschema import validate, ValidationError, draft7_format_checker
-from werkzeug.exceptions import NotFound, BadRequest, Conflict, UnsupportedMediaType, InternalServerError
+from jsonschema import validate, ValidationError
+from werkzeug.exceptions import NotFound, BadRequest, Conflict, UnsupportedMediaType
 from sqlalchemy.exc import IntegrityError
 from gymworkoutapi import db
 from gymworkoutapi.models import Workout, Movement
@@ -26,7 +26,7 @@ class WorkoutCollection(Resource):
         
         # validation
         try:
-            validate(request.json, Workout.json_schema(), format_checker=draft7_format_checker)
+            validate(request.json, Workout.json_schema())
         except ValidationError as e:
             raise BadRequest(description=str(e))
         
@@ -54,7 +54,7 @@ class WorkoutItem(Resource):
         
         # validation
         try:
-            validate(request.json, Workout.json_schema(), format_checker=draft7_format_checker)
+            validate(request.json, Workout.json_schema())
         except ValidationError as e:
             raise BadRequest(description=str(e))
         
@@ -73,7 +73,7 @@ class WorkoutItem(Resource):
     
         # validation
         try:
-            validate(request.json, Movement.json_schema(), format_checker=draft7_format_checker)
+            validate(request.json, Movement.json_schema())
         except ValidationError as e:
             raise BadRequest(description=str(e))
 
