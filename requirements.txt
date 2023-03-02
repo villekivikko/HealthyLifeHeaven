@@ -1,6 +1,8 @@
 # For the main app
 pip install flask
 pip install flask-sqlalchemy
+pip install flask-restful
+pip install jsonschema
 
 # For the testing environments
 pip install pytest
