@@ -45,8 +45,6 @@ class WorkoutItem(Resource):
         return workout.serialize()
     
     def put(self, user, workout):
-        if not workout:
-            raise NotFound(description="The workout not found")
 
         # validation
         try:
@@ -84,23 +82,12 @@ class WorkoutItem(Resource):
             if item.movement_name == request.json["movement_name"]:
                 raise Conflict(description="Movement name already in use")
 
-        try:
-            db.session.add(movement)
-            db.session.commit()
-        except Exception as e:
-            raise BadRequest(description=str(e))
-        
+        db.session.add(movement)
+        db.session.commit()
         return "Success", 201
 
     def delete(self, user, workout):
         workout = Workout.query.filter_by(workout_name=workout.workout_name).first()
-        if not workout:
-            raise NotFound(description="The workout not found")
-
-        try:
-            db.session.delete(workout)
-            db.session.commit()
-        except Exception as e:
-            raise BadRequest(description=str(e))
-        
+        db.session.delete(workout)
+        db.session.commit()
         return "Success", 201

@@ -13,8 +13,6 @@ class MovementItem(Resource):
     def delete(self, user, workout, movement):
         
         movement = Movement.query.filter_by(movement_name=movement, workout_id=workout.id).first()
-        if not movement:
-            raise NotFound(description="The movement not found")
 
         try:
             db.session.delete(movement)

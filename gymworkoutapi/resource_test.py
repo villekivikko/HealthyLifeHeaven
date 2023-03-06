@@ -177,7 +177,7 @@ class TestUserItem(object):
         assert resp.status_code == 400
         resp = client.put(self.INVALID_URL, json=valid)
         assert resp.status_code == 404
-        
+
         #test with another user's name
         valid["username"] = "test_user2"
         resp = client.put(self.RESOURCE_URL, json=valid)
@@ -395,5 +395,5 @@ class TestMovementItem(object):
         resp = client.get(self.RESOURCE_URL)
         assert resp.status_code == 404
         resp = client.delete(self.INVALID_URL)
-        assert resp.status_code == 404
+        assert resp.status_code == 400
         

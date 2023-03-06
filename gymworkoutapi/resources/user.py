@@ -41,9 +41,7 @@ class UserItem(Resource):
         return user.serialize()
 
     def put(self, user):
-        if not user:
-            raise NotFound(description="The user not found")
-        
+
         # validation
         try:
             validate(request.json, User.json_schema())
@@ -62,13 +60,6 @@ class UserItem(Resource):
 
     def delete(self, user):
         user = User.query.filter_by(username=user.username).first()
-        if not user:
-            raise NotFound(description="The user not found")
-
-        try:
-            db.session.delete(user)
-            db.session.commit()
-        except Exception as e:
-            raise BadRequest(description=str(e))
-        
+        db.session.delete(user)
+        db.session.commit()
         return "Success", 201
