@@ -1,3 +1,7 @@
+"""
+REFERENCE: https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/
+"""
+
 from flask_restful import Resource
 from werkzeug.exceptions import NotFound, BadRequest
 from gymworkoutapi import db

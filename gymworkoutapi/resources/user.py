@@ -1,3 +1,7 @@
+"""
+REFERENCE: https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/
+"""
+
 import json
 from flask import request, Response
 from flask_restful import Resource
