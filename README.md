@@ -22,3 +22,8 @@ Linux based system:
   - EXPORT FLASK_APP=gymworkoutapi
   - EXPORT FLASK_DEBUG=1
   - pytest --cov=gymworkoutapi
+  
+Git bash etc:
+  - export FLASK_APP=gymworkoutapi
+  - export FLASK_DEBUG=1
+  - pytest --cov=gymworkoutapi
