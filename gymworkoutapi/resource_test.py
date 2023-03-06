@@ -123,8 +123,8 @@ class TestUserCollection(object):
         #test with valid and see that it exists afterward
         resp = client.post(self.RESOURCE_URL, json=valid)
         assert resp.status_code == 201
-        assert resp.headers.endswith(self.RESOURCE_URL + valid["username"] + "/")
-        resp = client.get(resp.headers)
+        location = "/api/users/" + valid["username"] + "/"
+        resp = client.get(location)
         assert resp.status_code == 200
         body = json.loads(resp.data)
         assert body["username"] == "extra_user1"
@@ -168,7 +168,7 @@ class TestUserItem(object):
         """
         Tests the PUT method. Checks the following:
         error codes, valid request receives a 201 response,
-        when name is changed the sensor can't be found from its new URI
+        when name is changed the user can't be found from its new URI
         """
         valid = _get_user_json()
 
@@ -244,6 +244,8 @@ class TestWorkoutCollection(object):
         #test with valid and see that it exists afterward
         resp = client.post(self.RESOURCE_URL, json=valid)
         assert resp.status_code == 201
+        location = RESOURCE_URL + 'extra_workout1' + '/'
+        resp = client.get(location)
         body = json.loads(resp.data)
         assert body["workout_name"] == "extra_workout1"
         assert body["favorite"] == True
@@ -341,16 +343,19 @@ class TestWorkoutItem(object):
         #test with valid and see that it exists afterward
         resp = client.post(self.RESOURCE_URL, json=valid)
         assert resp.status_code == 201
+        location = self.RESOURCE_URL + 'extra_movement1' + '/'
+        resp = client.get(location)
         body = json.loads(resp.data)
-        assert body["workout_name"] == "extra_workout1"
-        assert body["favorite"] == True
+        assert body["movement_name"] == "extra_movement1"
+        assert body["sets"] == 3
+        assert body["reps"] == 5
 
         # send same data again for 409
         resp = client.post(self.RESOURCE_URL, json=valid)
         assert resp.status_code == 409
         
         # remove field for 400
-        valid.pop("favorite")
+        valid.pop("sets")
         resp = client.post(self.RESOURCE_URL, json=valid)
         assert resp.status_code == 400
         
