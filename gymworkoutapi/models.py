@@ -1,5 +1,7 @@
 """
-REFERENCE: https://github.com/enkwolf/pwp-course-sensorhub-api-example/blob/master/sensorhub/models.py
+REFERENCE: 
+https://github.com/enkwolf/pwp-course-sensorhub-api-example/blob/master/sensorhub/models.py
+https://coverage.readthedocs.io/en/6.4.4/excluding.html
 """
 from gymworkoutapi import db
 import click
