@@ -21,8 +21,6 @@ class WorkoutCollection(Resource):
         return Response(json.dumps(response_data), 200)
 
     def post(self, user):
-        if not request.json:
-            raise UnsupportedMediaType(description="Wrong media type, use JSON")
         
         # validation
         try:
@@ -49,9 +47,7 @@ class WorkoutItem(Resource):
     def put(self, user, workout):
         if not workout:
             raise NotFound(description="The workout not found")
-        if not request.json:
-            raise UnsupportedMediaType(description="Wrong media type, use JSON")
-        
+
         # validation
         try:
             validate(request.json, Workout.json_schema())
@@ -68,8 +64,6 @@ class WorkoutItem(Resource):
         return "Success", 201 
 
     def post(self, user, workout):
-        if not request.json:
-            raise UnsupportedMediaType(description="Wrong media type, use JSON")
     
         # validation
         try:

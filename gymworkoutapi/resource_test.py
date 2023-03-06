@@ -118,7 +118,7 @@ class TestUserCollection(object):
 
         #test with wrong content type
         resp = client.post(self.RESOURCE_URL, data=json.dumps(valid))
-        assert resp.status_code == 415
+        assert resp.status_code == 400
 
         #test with valid and see that it exists afterward
         resp = client.post(self.RESOURCE_URL, json=valid)
@@ -174,7 +174,7 @@ class TestUserItem(object):
 
         #test with wrong content type
         resp = client.put(self.RESOURCE_URL, data=json.dumps(valid))
-        assert resp.status_code == 415
+        assert resp.status_code == 400
         resp = client.put(self.INVALID_URL, json=valid)
         assert resp.status_code == 404
         
@@ -239,7 +239,7 @@ class TestWorkoutCollection(object):
 
         #test with wrong content type
         resp = client.post(self.RESOURCE_URL, data=json.dumps(valid))
-        assert resp.status_code == 415
+        assert resp.status_code == 400
 
         #test with valid and see that it exists afterward
         resp = client.post(self.RESOURCE_URL, json=valid)
@@ -291,7 +291,7 @@ class TestWorkoutItem(object):
 
         #test with wrong content type
         resp = client.put(self.RESOURCE_URL, data=json.dumps(valid))
-        assert resp.status_code == 415
+        assert resp.status_code == 400
         resp = client.put(self.INVALID_URL, json=valid)
         assert resp.status_code == 404
         
@@ -338,7 +338,7 @@ class TestWorkoutItem(object):
         #test with wrong content type
         resp = client.post(self.RESOURCE_URL, data=json.dumps(valid))
         print(resp)
-        assert resp.status_code == 415
+        assert resp.status_code == 400
 
         #test with valid and see that it exists afterward
         resp = client.post(self.RESOURCE_URL, json=valid)

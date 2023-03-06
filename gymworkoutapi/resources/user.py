@@ -17,8 +17,6 @@ class UserCollection(Resource):
         return Response(json.dumps(response_data), 200)
 
     def post(self):
-        if not request.json:
-            raise UnsupportedMediaType(description="Wrong media type, use JSON")
     
         # validation
         try:
@@ -45,8 +43,6 @@ class UserItem(Resource):
     def put(self, user):
         if not user:
             raise NotFound(description="The user not found")
-        if not request.json:
-            raise UnsupportedMediaType(description="Wrong media type, use JSON")
         
         # validation
         try:
