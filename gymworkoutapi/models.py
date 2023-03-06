@@ -128,11 +128,9 @@ class Movement(db.Model):
         }
         return schema
 
-
-
 @click.command("init_db")
 @with_appcontext
-def init_db_command():
+def init_db_command(): # pragma: no cover
 
     import os
     file_path = "instance/development.db"
@@ -146,7 +144,7 @@ def init_db_command():
 
 @click.command("test_db")
 @with_appcontext
-def db_test():
+def db_test(): # pragma: no cover
 
     # Create test data
     u1 = User(
