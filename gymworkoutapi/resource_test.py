@@ -181,7 +181,7 @@ class TestUserItem(object):
         #test with another user's name
         valid["username"] = "test_user2"
         resp = client.put(self.RESOURCE_URL, json=valid)
-        assert resp.status_code == 409
+        assert resp.status_code == 400
 
         #test with valid (change user)
         valid["username"] = "test_user1"
@@ -235,16 +235,16 @@ class TestWorkoutCollection(object):
         Tests POST method by checking the following:
         error codes, valid request receives a 201 response
         """
-        valid = _get_movement_json()
+        valid = _get_workout_json()
 
         #test with wrong content type
         resp = client.post(self.RESOURCE_URL, data=json.dumps(valid))
-        assert resp.status_code == 400
+        assert resp.status_code == 415
 
         #test with valid and see that it exists afterward
         resp = client.post(self.RESOURCE_URL, json=valid)
         assert resp.status_code == 201
-        location = RESOURCE_URL + 'extra_workout1' + '/'
+        location = self.RESOURCE_URL + 'extra_workout1' + '/'
         resp = client.get(location)
         body = json.loads(resp.data)
         assert body["workout_name"] == "extra_workout1"
@@ -298,7 +298,7 @@ class TestWorkoutItem(object):
         #test with another workout's name
         valid["workout_name"] = "test_workout2"
         resp = client.put(self.RESOURCE_URL, json=valid)
-        assert resp.status_code == 409
+        assert resp.status_code == 400
 
         #test with valid (change workout)
         valid["workout_name"] = "test_workout1"
