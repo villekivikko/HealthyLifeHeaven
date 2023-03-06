@@ -14,11 +14,11 @@ Used database: SQLAlchemy (1.4.46) => SQLite
 How to run tests:
 
 Windows based system:
-set FLASK_APP=gymworkoutapi
-set FLASK_DEBUG=1
-pytest --cov=gymworkoutapi
+  - set FLASK_APP=gymworkoutapi
+  - set FLASK_DEBUG=1
+  - pytest --cov=gymworkoutapi
 
 Linux based system:
-EXPORT FLASK_APP=gymworkoutapi
-EXPORT FLASK_DEBUG=1
-pytest --cov=gymworkoutapi
+  - EXPORT FLASK_APP=gymworkoutapi
+  - EXPORT FLASK_DEBUG=1
+  - pytest --cov=gymworkoutapi
