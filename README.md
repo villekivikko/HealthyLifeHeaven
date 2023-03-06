@@ -11,8 +11,14 @@ How to install dependencies (assuming pip is installed):
 
 Used database: SQLAlchemy (1.4.46) => SQLite
 
-To initialize database, run command: flask init_db
+How to run tests:
 
-To test database functionality, run command: flask test_db
+Windows based system:
+set FLASK_APP=gymworkoutapi
+set FLASK_DEBUG=1
+pytest --cov=gymworkoutapi
 
-The above commands initialize, populate, and test the database. 
+Linux based system:
+EXPORT FLASK_APP=gymworkoutapi
+EXPORT FLASK_DEBUG=1
+pytest --cov=gymworkoutapi
