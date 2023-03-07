@@ -1,18 +1,19 @@
 """
-REFERENCE: https://github.com/enkwolf/pwp-course-sensorhub-api-example/blob/master/tests/resource_test.py
-           AND
-           https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/testing-flask-applications-part-2/
+REFERENCE: 
+https://github.com/enkwolf/pwp-course-sensorhub-api-example/blob/master/tests/resource_test.py
+AND
+https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/testing-flask-applications-part-2/
 """
 import os
 import json
-import pytest
 import tempfile
 import random
+import pytest
 from sqlalchemy.engine import Engine
 from sqlalchemy import event
 
-from . import create_app, db
 from gymworkoutapi.models import User, Workout, Movement
+from . import create_app, db
 
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
@@ -40,9 +41,8 @@ def client():
     os.close(db_fd)
     #os.unlink(db_fname)
 
-
 def _populate_db():
-    
+
     workout_ids = [6, 5, 4, 3, 2, 1]
     movement_ids = [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
     # 3 test users, 2 workouts for each user, 2 movements in each workout
@@ -68,14 +68,14 @@ def _populate_db():
                     reps= random.randrange(5, 12)
                 )
                 db.session.add(movement)
-    
+
     db.session.commit()
 
 def _get_user_json(number=1):
     """
     Creates a valid user JSON object to be used for PUT and POST tests.
     """
-    return {"username": "extra_user{}".format(number), 
+    return {"username": "extra_user{}".format(number),
         "height": 150.0, "weight": 50.0}
 
 def _get_workout_json(number=1):
@@ -89,13 +89,13 @@ def _get_movement_json(number=1):
     """
     Creates a valid movement JSON object to be used for PUT and POST tests.
     """
-    return {"workout_id":1,"movement_name": "extra_movement{}".format(number), 
+    return {"workout_id":1,"movement_name": "extra_movement{}".format(number),
         "sets": 3, "reps": 5}
 
 
-class TestUserCollection(object):
+class TestUserCollection():
     """
-    This class implements tests for each HTTP method in UserCollection resource. 
+    This class implements tests for each HTTP method in UserCollection resource.
     """
     RESOURCE_URL = "/api/users/"
 
@@ -141,9 +141,9 @@ class TestUserCollection(object):
         assert resp.status_code == 400
 
 
-class TestUserItem(object):
+class TestUserItem():
     """
-    This class implements tests for each HTTP method in TestUserItem resource. 
+    This class implements tests for each HTTP method in TestUserItem resource.
     """
     RESOURCE_URL = "/api/users/test_user1/"
     INVALID_URL = "/api/users/non_user1/"
@@ -163,7 +163,7 @@ class TestUserItem(object):
         #assert body["weight"] == float
         resp = client.get(self.INVALID_URL)
         assert resp.status_code == 404
-    
+
     def test_put(self, client):
         """
         Tests the PUT method. Checks the following:
@@ -199,7 +199,7 @@ class TestUserItem(object):
         assert resp.status_code == 200
         body = json.loads(resp.data)
         assert body["height"] == valid["height"]
-        
+
     def test_delete(self, client):
         """
         Tests the DELETE method. Checks the following:
@@ -213,10 +213,10 @@ class TestUserItem(object):
         assert resp.status_code == 404
         resp = client.delete(self.INVALID_URL)
         assert resp.status_code == 404
-        
-class TestWorkoutCollection(object):
+
+class TestWorkoutCollection():
     """
-    This class implements tests for each HTTP method in WorkoutCollection resource. 
+    This class implements tests for each HTTP method in WorkoutCollection resource.
     """
     RESOURCE_URL = "/api/users/test_user1/workouts/"
 
@@ -258,10 +258,10 @@ class TestWorkoutCollection(object):
         valid.pop("favorite")
         resp = client.post(self.RESOURCE_URL, json=valid)
         assert resp.status_code == 400
-        
-class TestWorkoutItem(object):
+
+class TestWorkoutItem():
     """
-    This class implements tests for each HTTP method in TestWorkoutItem resource. 
+    This class implements tests for each HTTP method in TestWorkoutItem resource.
     """
     RESOURCE_URL = "/api/users/test_user1/workouts/test_workout1/"
     INVALID_URL = "/api/users/test_user1/workouts/non_workout1/"
@@ -280,7 +280,7 @@ class TestWorkoutItem(object):
         #assert body["favorite"] == True
         resp = client.get(self.INVALID_URL)
         assert resp.status_code == 404
-    
+
     def test_put(self, client):
         """
         Tests the PUT method. Checks the following:
@@ -294,7 +294,7 @@ class TestWorkoutItem(object):
         assert resp.status_code == 400
         resp = client.put(self.INVALID_URL, json=valid)
         assert resp.status_code == 404
-        
+
         #test with another workout's name
         valid["workout_name"] = "test_workout2"
         resp = client.put(self.RESOURCE_URL, json=valid)
@@ -316,7 +316,7 @@ class TestWorkoutItem(object):
         assert resp.status_code == 200
         body = json.loads(resp.data)
         assert body["workout_name"] == valid["workout_name"]
-        
+
     def test_delete(self, client):
         """
         Tests the DELETE method. Checks the following:
@@ -330,11 +330,11 @@ class TestWorkoutItem(object):
         assert resp.status_code == 404
         resp = client.delete(self.INVALID_URL)
         assert resp.status_code == 404
-    
+
     def test_post(self, client):
-        
+
         valid = _get_movement_json()
-        
+
         #test with wrong content type
         resp = client.post(self.RESOURCE_URL, data=json.dumps(valid))
         print(resp)
@@ -353,16 +353,16 @@ class TestWorkoutItem(object):
         # send same data again for 409
         resp = client.post(self.RESOURCE_URL, json=valid)
         assert resp.status_code == 409
-        
+
         # remove field for 400
         valid.pop("sets")
         resp = client.post(self.RESOURCE_URL, json=valid)
         assert resp.status_code == 400
-        
-        
-class TestMovementItem(object):
+
+
+class TestMovementItem():
     """
-    This class implements tests for each HTTP method in TestMovementItem resource. 
+    This class implements tests for each HTTP method in TestMovementItem resource.
     """
     RESOURCE_URL = "/api/users/test_user1/workouts/test_workout1/test_movement1/"
     INVALID_URL = "/api/users/test_user1/workouts/test_workout1/non_movement1/"
@@ -382,7 +382,7 @@ class TestMovementItem(object):
         #assert body["reps"]
         resp = client.get(self.INVALID_URL)
         assert resp.status_code == 404
-    
+
     def test_delete(self, client):
         """
         Tests the DELETE method. Checks the following:

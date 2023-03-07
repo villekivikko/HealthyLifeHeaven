@@ -1,15 +1,19 @@
+"""
+REFERENCE: https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/
+"""
+
 import json
 from flask import request, Response
 from flask_restful import Resource
 from jsonschema import validate, ValidationError
-from werkzeug.exceptions import NotFound, BadRequest, Conflict, UnsupportedMediaType
+from werkzeug.exceptions import BadRequest, Conflict
 from sqlalchemy.exc import IntegrityError
 from gymworkoutapi import db
 from gymworkoutapi.models import User
 
 class UserCollection(Resource):
     def get(self):
-        users = User.query.all() 
+        users = User.query.all()
         response_data = []
         while users:
             user = users.pop()
@@ -17,12 +21,12 @@ class UserCollection(Resource):
         return Response(json.dumps(response_data), 200)
 
     def post(self):
-    
+
         # validation
         try:
             validate(request.json, User.json_schema())
-        except ValidationError as e:
-            raise BadRequest(description=str(e))
+        except ValidationError as error:
+            raise BadRequest(description=str(error))
 
         # create a new user
         user = User()
@@ -45,18 +49,17 @@ class UserItem(Resource):
         # validation
         try:
             validate(request.json, User.json_schema())
-        except ValidationError as e:
-            raise BadRequest(description=str(e))
-        
+        except ValidationError as error:
+            raise BadRequest(description=str(error))
+
         # modify existing user information
         user.deserialize(request.json)
-        
+
         try:
             db.session.commit()
-        except Exception as e:
-            raise BadRequest(description=str(e))
-        
-        return "Success", 201
+        except Exception as error:
+            raise BadRequest(description=str(error))
+        return "User modified successfully", 201
 
     def delete(self, user):
         user = User.query.filter_by(username=user.username).first()

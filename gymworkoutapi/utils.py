@@ -1,5 +1,6 @@
 """
-REFERENCE: https://github.com/enkwolf/pwp-course-sensorhub-api-example/blob/master/sensorhub/utils.py
+REFERENCE: 
+https://github.com/enkwolf/pwp-course-sensorhub-api-example/blob/master/sensorhub/utils.py
 """
 
 from werkzeug.routing import BaseConverter
@@ -8,17 +9,17 @@ from gymworkoutapi.models import User, Workout
 
 class UserConverter(BaseConverter):
 
-    def to_python(self, name):
-        user = User.query.filter_by(username=name).first()
+    def to_python(self, value):
+        user = User.query.filter_by(username=value).first()
         if user is None:
             raise NotFound
         return user
-    
+
     def to_url(self, value):
         if type(value) != User:
             raise NotFound
         return value.username
-    
+
 class WorkoutConverter(BaseConverter):
 
     def to_python(self, value):
@@ -26,7 +27,7 @@ class WorkoutConverter(BaseConverter):
         if workout is None:
             raise NotFound
         return workout
-    
+
     def to_url(self, value):
         if type(value) != Workout:
             raise NotFound

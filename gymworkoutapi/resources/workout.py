@@ -6,14 +6,14 @@ import json
 from flask import request, Response
 from flask_restful import Resource
 from jsonschema import validate, ValidationError
-from werkzeug.exceptions import NotFound, BadRequest, Conflict, UnsupportedMediaType
+from werkzeug.exceptions import BadRequest, Conflict
 from sqlalchemy.exc import IntegrityError
 from gymworkoutapi import db
 from gymworkoutapi.models import Workout, Movement
 
 class WorkoutCollection(Resource):
     def get(self, user):
-        workouts = Workout.query.filter_by(user_id=user.id).all() 
+        workouts = Workout.query.filter_by(user_id=user.id).all()
         response_data = []
         while workouts:
             workout = workouts.pop()
@@ -21,13 +21,13 @@ class WorkoutCollection(Resource):
         return Response(json.dumps(response_data), 200)
 
     def post(self, user):
-        
+
         # validation
         try:
             validate(request.json, Workout.json_schema())
-        except ValidationError as e:
-            raise BadRequest(description=str(e))
-        
+        except ValidationError as error:
+            raise BadRequest(description=str(error))
+
         # create a new workout
         workout = Workout()
         workout.deserialize(request.json)
@@ -38,36 +38,36 @@ class WorkoutCollection(Resource):
             db.session.commit()
         except IntegrityError:
             raise Conflict(description="Workout name already in use")
-        return "Success", 201 
+        return "Success", 201
 
 class WorkoutItem(Resource):
     def get(self, user, workout):
         return workout.serialize()
-    
+
     def put(self, user, workout):
 
         # validation
         try:
             validate(request.json, Workout.json_schema())
-        except ValidationError as e:
-            raise BadRequest(description=str(e))
-        
+        except ValidationError as error:
+            raise BadRequest(description=str(error))
+
         # modify existing user information
         workout.deserialize(request.json)
 
         try:
             db.session.commit()
-        except Exception as e:
-            raise BadRequest(description=str(e))
-        return "Success", 201 
+        except Exception as error:
+            raise BadRequest(description=str(error))
+        return "Workout modified successfully", 201
 
     def post(self, user, workout):
-    
+
         # validation
         try:
             validate(request.json, Movement.json_schema())
-        except ValidationError as e:
-            raise BadRequest(description=str(e))
+        except ValidationError as error:
+            raise BadRequest(description=str(error))
 
         # create a new movement
         movement = Movement()
@@ -75,7 +75,7 @@ class WorkoutItem(Resource):
         movement.sets = request.json["sets"]
         movement.reps = request.json["reps"]
         movement.movement_name = request.json["movement_name"]
-        
+
         # movement name has to be unique within the workout, else raise error
         movements_in_workout = Movement.query.filter_by(workout_id=workout.id).all()
         for item in movements_in_workout:
