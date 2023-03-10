@@ -1,6 +1,6 @@
 
 """
-REFERENCE: 
+REFERENCE:
 https://github.com/enkwolf/pwp-course-sensorhub-api-example/blob/master/sensorhub/models.py
 https://coverage.readthedocs.io/en/6.4.4/excluding.html
 """
@@ -10,6 +10,10 @@ from flask.cli import with_appcontext
 from gymworkoutapi import db
 
 class User(db.Model):
+    """
+    Class for the user model
+    """
+
     id = db.Column(db.Integer, unique=True, primary_key=True, autoincrement=True)
     username = db.Column(db.String(64), nullable = False, unique=True)
     height = db.Column(db.Float, nullable=False)
@@ -20,6 +24,10 @@ class User(db.Model):
     workout = db.relationship('Workout', cascade="all,delete", back_populates='user')
 
     def serialize(self):
+        """
+        Serializer for the User class
+        """
+
         return {
             "username": self.username,
             "height": self.height,
@@ -29,6 +37,10 @@ class User(db.Model):
         }
 
     def deserialize(self, doc):
+        """
+        Deserializer for the User class
+        """
+
         self.username = doc.get("username")
         self.height = doc.get("height")
         self.weight = doc.get("weight")
@@ -38,6 +50,10 @@ class User(db.Model):
 
     @staticmethod
     def json_schema():
+        """
+        Defines a valid user document
+        """
+
         schema = {
             "type": "object",
             "required": ["username", "height", "weight"]
@@ -58,6 +74,10 @@ class User(db.Model):
         return schema
 
 class Workout(db.Model):
+    """
+    Class for the workout model
+    """
+
     id = db.Column(db.Integer, unique=True, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
     workout_name = db.Column(db.String(64), unique=True, nullable=False)
@@ -67,6 +87,10 @@ class Workout(db.Model):
     user = db.relationship('User', back_populates='workout')
 
     def serialize(self):
+        """
+        Serializer for the Workout class
+        """
+
         return {
             "user_id": self.user_id,
             "workout_name": self.workout_name,
@@ -74,11 +98,19 @@ class Workout(db.Model):
         }
 
     def deserialize(self, doc):
+        """
+        Deserializer for the Workout class
+        """
+
         self.workout_name = doc.get("workout_name")
         self.favorite = doc.get("favorite")
 
     @staticmethod
     def json_schema():
+        """
+        Defines a valid workout document
+        """
+
         schema = {
             "type": "object",
             "required": ["workout_name", "favorite"]
@@ -95,6 +127,10 @@ class Workout(db.Model):
         return schema
 
 class Movement(db.Model):
+    """
+    Class for the movement model
+    """
+
     id = db.Column(db.Integer, unique=True, primary_key=True, autoincrement=True)
     workout_id = db.Column(db.Integer, db.ForeignKey('workout.id'), nullable = False)
     movement_name = db.Column(db.String(64), nullable=False)
@@ -104,6 +140,10 @@ class Movement(db.Model):
     workout = db.relationship('Workout', back_populates='movement')
 
     def serialize(self):
+        """
+        Serializer for the Movement class
+        """
+
         return {
             "workout_id": self.workout_id,
             "movement_name": self.movement_name,
@@ -113,6 +153,10 @@ class Movement(db.Model):
 
     @staticmethod
     def json_schema():
+        """
+        Defines a valid movement document
+        """
+
         schema = {
             "type": "object",
             "required": ["movement_name", "sets", "reps"]
@@ -135,6 +179,9 @@ class Movement(db.Model):
 @click.command("init_db")
 @with_appcontext
 def init_db_command(): # pragma: no cover
+    """
+    Initializes database
+    """
 
     import os
     file_path = "instance/dev.db"
@@ -149,6 +196,9 @@ def init_db_command(): # pragma: no cover
 @click.command("test_db")
 @with_appcontext
 def db_test(): # pragma: no cover
+    """
+    Database testing
+    """
 
     # Create test data
     u_1 = User(

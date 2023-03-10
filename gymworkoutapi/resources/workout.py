@@ -12,7 +12,15 @@ from gymworkoutapi import db
 from gymworkoutapi.models import Workout, Movement
 
 class WorkoutCollection(Resource):
+    """
+    Class for the WorkoutCollection resource
+    """
+
     def get(self, user):
+        """
+        Get method for WorkoutCollection resource
+        """
+
         workouts = Workout.query.filter_by(user_id=user.id).all()
         response_data = []
         while workouts:
@@ -21,12 +29,15 @@ class WorkoutCollection(Resource):
         return Response(json.dumps(response_data), 200)
 
     def post(self, user):
+        """
+        Post method for WorkoutCollection resource
+        """
 
         # validation
         try:
             validate(request.json, Workout.json_schema())
         except ValidationError as error:
-            raise BadRequest(description=str(error))
+            raise BadRequest(description=str(error)) from error
 
         # create a new workout
         workout = Workout()
@@ -36,21 +47,32 @@ class WorkoutCollection(Resource):
         try:
             db.session.add(workout)
             db.session.commit()
-        except IntegrityError:
-            raise Conflict(description="Workout name already in use")
+        except IntegrityError as error:
+            raise Conflict(description="Workout name already in use") from error
         return "Success", 201
 
 class WorkoutItem(Resource):
-    def get(self, user, workout):
+    """
+    Class for the WorkoutItem resource
+    """
+
+    def get(self, _, workout):
+        """
+        Get method for WorkoutItem resource
+        """
+
         return workout.serialize()
 
-    def put(self, user, workout):
+    def put(self, _, workout):
+        """
+        Put method for WorkoutItem resource
+        """
 
         # validation
         try:
             validate(request.json, Workout.json_schema())
         except ValidationError as error:
-            raise BadRequest(description=str(error))
+            raise BadRequest(description=str(error)) from error
 
         # modify existing user information
         workout.deserialize(request.json)
@@ -58,16 +80,19 @@ class WorkoutItem(Resource):
         try:
             db.session.commit()
         except Exception as error:
-            raise BadRequest(description=str(error))
+            raise BadRequest(description=str(error)) from error
         return "Workout modified successfully", 201
 
-    def post(self, user, workout):
+    def post(self, _, workout):
+        """
+        Post method for WorkoutItem resource
+        """
 
         # validation
         try:
             validate(request.json, Movement.json_schema())
         except ValidationError as error:
-            raise BadRequest(description=str(error))
+            raise BadRequest(description=str(error)) from error
 
         # create a new movement
         movement = Movement()
@@ -86,7 +111,11 @@ class WorkoutItem(Resource):
         db.session.commit()
         return "Success", 201
 
-    def delete(self, user, workout):
+    def delete(self, _, workout):
+        """
+        Delete method for WorkoutItem resource
+        """
+
         workout = Workout.query.filter_by(workout_name=workout.workout_name).first()
         db.session.delete(workout)
         db.session.commit()

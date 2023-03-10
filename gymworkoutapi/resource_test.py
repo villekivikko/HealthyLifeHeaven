@@ -1,5 +1,5 @@
 """
-REFERENCE: 
+REFERENCE:
 https://github.com/enkwolf/pwp-course-sensorhub-api-example/blob/master/tests/resource_test.py
 AND
 https://lovelace.oulu.fi/ohjelmoitava-web/ohjelmoitava-web/testing-flask-applications-part-2/
@@ -16,13 +16,21 @@ from gymworkoutapi.models import User, Workout, Movement
 from . import create_app, db
 
 @event.listens_for(Engine, "connect")
-def set_sqlite_pragma(dbapi_connection, connection_record):
+def set_sqlite_pragma(dbapi_connection, _):
+    """
+    Enable foreign keys for SQLite
+    """
+
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()
 
 @pytest.fixture
 def client():
+    """
+    Testing client
+    """
+
     db_fd, db_fname = tempfile.mkstemp()
 
     config = {
@@ -42,6 +50,9 @@ def client():
     #os.unlink(db_fname)
 
 def _populate_db():
+    """
+    Database population
+    """
 
     workout_ids = [6, 5, 4, 3, 2, 1]
     movement_ids = [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
@@ -60,7 +71,7 @@ def _populate_db():
                 favorite= random.choice([True, False])
             )
             db.session.add(workout)
-            for z in range(1, 3):
+            for _ in range(2):
                 movement = Movement(
                     workout_id=j,
                     movement_name="test_movement{}".format(movement_ids.pop()),
@@ -100,6 +111,9 @@ class TestUserCollection():
     RESOURCE_URL = "/api/users/"
 
     def test_get(self, client):
+        """
+        Tests GET method
+        """
         resp = client.get(self.RESOURCE_URL)
         assert resp.status_code == 200
         body = json.loads(resp.data)
@@ -221,6 +235,10 @@ class TestWorkoutCollection():
     RESOURCE_URL = "/api/users/test_user1/workouts/"
 
     def test_get(self, client):
+        """
+        Tests GET method
+        """
+
         resp = client.get(self.RESOURCE_URL)
         assert resp.status_code == 200
         body = json.loads(resp.data)
@@ -248,7 +266,7 @@ class TestWorkoutCollection():
         resp = client.get(location)
         body = json.loads(resp.data)
         assert body["workout_name"] == "extra_workout1"
-        assert body["favorite"] == True
+        assert body["favorite"] is True
 
         #send same data again for 409
         resp = client.post(self.RESOURCE_URL, json=valid)
@@ -332,6 +350,9 @@ class TestWorkoutItem():
         assert resp.status_code == 404
 
     def test_post(self, client):
+        """
+        Tests the post method
+        """
 
         valid = _get_movement_json()
 
