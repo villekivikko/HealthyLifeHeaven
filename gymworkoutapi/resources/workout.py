@@ -56,14 +56,14 @@ class WorkoutItem(Resource):
     Class for the WorkoutItem resource
     """
 
-    def get(self, _, workout):
+    def get(self, user, workout):
         """
         Get method for WorkoutItem resource
         """
 
         return workout.serialize()
 
-    def put(self, _, workout):
+    def put(self, user, workout):
         """
         Put method for WorkoutItem resource
         """
@@ -83,7 +83,7 @@ class WorkoutItem(Resource):
             raise BadRequest(description=str(error)) from error
         return "Workout modified successfully", 201
 
-    def post(self, _, workout):
+    def post(self, user, workout):
         """
         Post method for WorkoutItem resource
         """
@@ -111,7 +111,7 @@ class WorkoutItem(Resource):
         db.session.commit()
         return "Success", 201
 
-    def delete(self, _, workout):
+    def delete(self, user, workout):
         """
         Delete method for WorkoutItem resource
         """

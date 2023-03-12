@@ -27,7 +27,7 @@ class UserConverter(BaseConverter):
         Python to URL method
         """
 
-        if type(value) != User:
+        if isinstance(value) != User:
             raise NotFound
         return value.username
 
@@ -51,6 +51,6 @@ class WorkoutConverter(BaseConverter):
         Python to URL method
         """
 
-        if type(value) != Workout:
+        if isinstance(value) != Workout:
             raise NotFound
         return value.workout_name

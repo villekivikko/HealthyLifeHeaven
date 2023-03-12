@@ -11,7 +11,7 @@ class MovementItem(Resource):
     Class for the MovementItem resource
     """
 
-    def get(self, _, workout, movement):
+    def get(self, user, workout, movement):
         """
         Get method for MovementItem resource
         """
@@ -20,7 +20,7 @@ class MovementItem(Resource):
             raise NotFound(description="The movement not found")
         return movement.serialize()
 
-    def delete(self, _, workout, movement):
+    def delete(self, user, workout, movement):
         """
         Delete method for MovementItem resource
         """
