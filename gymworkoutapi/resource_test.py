@@ -59,7 +59,7 @@ def _populate_db():
     # 3 test users, 2 workouts for each user, 2 movements in each workout
     for i in range(1, 4):
         user = User(
-            username="test_user{}".format(i),
+            username=f"test_user{i}",
             height= random.uniform(150.0, 200.0),
             weight= random.uniform(50.0, 120.0)
         )
@@ -67,14 +67,14 @@ def _populate_db():
         for j in range(1, 3):
             workout = Workout(
                 user_id= i,
-                workout_name="test_workout{}".format(workout_ids.pop()),
+                workout_name=f"test_workout{workout_ids.pop()}",
                 favorite= random.choice([True, False])
             )
             db.session.add(workout)
             for _ in range(2):
                 movement = Movement(
                     workout_id=j,
-                    movement_name="test_movement{}".format(movement_ids.pop()),
+                    movement_name=f"test_movement{movement_ids.pop()}",
                     sets= random.randrange(3, 5),
                     reps= random.randrange(5, 12)
                 )
@@ -86,21 +86,21 @@ def _get_user_json(number=1):
     """
     Creates a valid user JSON object to be used for PUT and POST tests.
     """
-    return {"username": "extra_user{}".format(number),
+    return {"username": f"extra_user{number}",
         "height": 150.0, "weight": 50.0}
 
 def _get_workout_json(number=1):
     """
     Creates a valid workout JSON object to be used for PUT and POST tests.
     """
-    return {"user_id":1,"workout_name": "extra_workout{}".format(number),
+    return {"user_id":1,"workout_name": f"extra_workout{number}",
         "favorite":True}
 
 def _get_movement_json(number=1):
     """
     Creates a valid movement JSON object to be used for PUT and POST tests.
     """
-    return {"workout_id":1,"movement_name": "extra_movement{}".format(number),
+    return {"workout_id":1,"movement_name": f"extra_movement{number}",
         "sets": 3, "reps": 5}
 
 
