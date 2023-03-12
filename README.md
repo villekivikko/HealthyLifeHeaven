@@ -1,4 +1,4 @@
-# gym workout API
+# gym-workout-API
 
 How to install dependencies (assuming pip is installed):
   - run: pip install -r requirements.txt
