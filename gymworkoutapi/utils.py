@@ -9,12 +9,12 @@ from gymworkoutapi.models import User, Workout
 
 class UserConverter(BaseConverter):
     """
-    TODO
+    User converter
     """
 
     def to_python(self, value):
         """
-        TODO
+        URL to python method
         """
 
         user = User.query.filter_by(username=value).first()
@@ -24,7 +24,7 @@ class UserConverter(BaseConverter):
 
     def to_url(self, value):
         """
-        TODO
+        Python to URL method
         """
 
         if type(value) != User:
@@ -33,12 +33,12 @@ class UserConverter(BaseConverter):
 
 class WorkoutConverter(BaseConverter):
     """
-    TODO
+    Workout converter
     """
 
     def to_python(self, value):
         """
-        TODO
+        URL to python method
         """
 
         workout = Workout.query.filter_by(workout_name=value).first()
@@ -48,7 +48,7 @@ class WorkoutConverter(BaseConverter):
 
     def to_url(self, value):
         """
-        TODO
+        Python to URL method
         """
 
         if type(value) != Workout:
