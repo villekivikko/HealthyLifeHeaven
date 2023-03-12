@@ -7,3 +7,4 @@ jsonschema
 # For the testing environments
 pytest
 pytest-cov
+pylint
