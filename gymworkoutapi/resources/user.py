@@ -95,7 +95,7 @@ class UserItem(Resource):
     def delete(self, user):
         """
         Delete method for UserItem resource
-        User is deleted with this. 
+        User is deleted with this.
         """
 
         user = User.query.filter_by(username=user.username).first()

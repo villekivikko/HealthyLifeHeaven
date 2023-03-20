@@ -75,8 +75,8 @@ class WorkoutItem(Resource):
     def put(self, user, workout):
         """
         Put method for WorkoutItem resource
-        Workout is edited with this. 
-        If trying to edit it incorrectly, BadRequest is raised. 
+        Workout is edited with this.
+        If trying to edit it incorrectly, BadRequest is raised.
         """
 
         # validation
