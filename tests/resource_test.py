@@ -11,9 +11,8 @@ import random
 import pytest
 from sqlalchemy.engine import Engine
 from sqlalchemy import event
-
 from gymworkoutapi.models import User, Workout, Movement
-from . import create_app, db
+from gymworkoutapi import create_app, db
 
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_connection, _):
