@@ -79,7 +79,7 @@ class Workout(db.Model):
     """
 
     id = db.Column(db.Integer, unique=True, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete = "CASCADE"), nullable = False)
     workout_name = db.Column(db.String(64), unique=True, nullable=False)
     favorite = db.Column(db.Boolean, nullable=False)
 
@@ -132,7 +132,7 @@ class Movement(db.Model):
     """
 
     id = db.Column(db.Integer, unique=True, primary_key=True, autoincrement=True)
-    workout_id = db.Column(db.Integer, db.ForeignKey('workout.id'), nullable = False)
+    workout_id = db.Column(db.Integer, db.ForeignKey('workout.id', ondelete = "CASCADE"), nullable = False)
     movement_name = db.Column(db.String(64), nullable=False)
     sets = db.Column(db.Float, nullable=False)
     reps = db.Column(db.Float, nullable=False)
