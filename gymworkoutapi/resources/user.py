@@ -13,12 +13,15 @@ from gymworkoutapi.models import User
 
 class UserCollection(Resource):
     """
-    Class for the UserCollection resource
+    Class for the UserCollection resource.
+    UserCollection is a collection of users.
+    GET and POST methods are implemented.
     """
 
     def get(self):
         """
-        Get method for UserCollection resource
+        Get method for UserCollection resource.
+        UserCollection is fetched with this.
         """
         users = User.query.all()
         response_data = []
@@ -30,6 +33,9 @@ class UserCollection(Resource):
     def post(self):
         """
         Post method for UserCollection resource
+        Users is posted with this. If trying to post
+        User that does not follow the schema, BadRequest is raised.
+        If username is already in use, Conflict is raised.
         """
 
         # validation
@@ -53,17 +59,22 @@ class UserCollection(Resource):
 class UserItem(Resource):
     """
     Class for the UserItem resource
+    UserItem is an individual user.
+    GET, PUT and DELETE methods are implemented.
     """
     def get(self, user):
         """
-        Get method for UserItem resource
+        Get method for UserItem resource.
+        User gets fetched with this method.
         """
 
         return user.serialize()
 
     def put(self, user):
         """
-        Put method for UserItem resource
+        Put method for UserItem resource.
+        User is edited with this.
+        If the schema is not followed, BadRequest is raised.
         """
 
         # validation
@@ -84,6 +95,7 @@ class UserItem(Resource):
     def delete(self, user):
         """
         Delete method for UserItem resource
+        User is deleted with this. 
         """
 
         user = User.query.filter_by(username=user.username).first()

@@ -13,12 +13,15 @@ from gymworkoutapi.models import Workout, Movement
 
 class WorkoutCollection(Resource):
     """
-    Class for the WorkoutCollection resource
+    Class for the WorkoutCollection resource.
+    WorkoutCollection is a collection of workouts by the user
+    which has GET and POST methods.
     """
 
     def get(self, user):
         """
         Get method for WorkoutCollection resource
+        With this method, the workout collection can be fetched.
         """
 
         workouts = Workout.query.filter_by(user_id=user.id).all()
@@ -31,6 +34,9 @@ class WorkoutCollection(Resource):
     def post(self, user):
         """
         Post method for WorkoutCollection resource
+        With this method, the workouts can be posted.
+        If trying to post not valid workout, BadRequest is raised.
+        If workout name is already in use, Conflict is raised.
         """
 
         # validation
@@ -53,12 +59,15 @@ class WorkoutCollection(Resource):
 
 class WorkoutItem(Resource):
     """
-    Class for the WorkoutItem resource
+    Class for the WorkoutItem resource.
+    WorkoutItem is a single workout in the user collection.
+    GET, PUT, POST and DELETE methods are implemented.
     """
 
     def get(self, user, workout):
         """
-        Get method for WorkoutItem resource
+        Get method for WorkoutItem resource.
+        Workout is fetched with this.
         """
 
         return workout.serialize()
@@ -66,6 +75,8 @@ class WorkoutItem(Resource):
     def put(self, user, workout):
         """
         Put method for WorkoutItem resource
+        Workout is edited with this. 
+        If trying to edit it incorrectly, BadRequest is raised. 
         """
 
         # validation
@@ -85,7 +96,11 @@ class WorkoutItem(Resource):
 
     def post(self, user, workout):
         """
-        Post method for WorkoutItem resource
+        Post method for WorkoutItem resource.
+        Workout is posted with this.
+        If the workout being posted does not follow the schema,
+        BadRequest is raised. If the Workout name is already in use,
+        Conflict is raised.
         """
 
         # validation
@@ -114,6 +129,7 @@ class WorkoutItem(Resource):
     def delete(self, user, workout):
         """
         Delete method for WorkoutItem resource
+        Workout is deleted with this.
         """
 
         workout = Workout.query.filter_by(workout_name=workout.workout_name).first()

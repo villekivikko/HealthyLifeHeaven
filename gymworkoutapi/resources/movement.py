@@ -9,11 +9,15 @@ from gymworkoutapi.models import Movement
 class MovementItem(Resource):
     """
     Class for the MovementItem resource
+    MovementItem is a single movement in the workout
+    which has GET and DELETE methods.
     """
 
     def get(self, user, workout, movement):
         """
         Get method for MovementItem resource
+        With this method, the movements can be fetched.
+        If the movement does not exist, NotFound is raised.
         """
         movement = Movement.query.filter_by(movement_name=movement, workout_id=workout.id).first()
         if not movement:
@@ -23,6 +27,8 @@ class MovementItem(Resource):
     def delete(self, user, workout, movement):
         """
         Delete method for MovementItem resource
+        With this method, the movements can be deleted.
+        If the movement does not exist, BadRequest is raised.
         """
         movement = Movement.query.filter_by(movement_name=movement, workout_id=workout.id).first()
 
