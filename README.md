@@ -28,3 +28,6 @@ How to run tests:
 
 Check code quality (pylint):
   - pylint gymworkoutapi --disable=no-member,import-outside-toplevel,no-self-use
+
+Test documentation with Swagger: 
+- localhost:5000/apidocs/
