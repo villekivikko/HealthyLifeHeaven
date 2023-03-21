@@ -6,6 +6,7 @@ https://github.com/enkwolf/pwp-course-sensorhub-api-example/blob/master/sensorhu
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flasgger import Swagger, swag_from
 
 db = SQLAlchemy()
 
@@ -14,11 +15,17 @@ def create_app(test_config=None):
     Function used to create the application
     """
 
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask(__name__, instance_relative_config=True, static_folder="static")
     app.config.from_mapping(
             SQLALCHEMY_DATABASE_URI="sqlite:///" + os.path.join(app.instance_path, "dev.db"),
             SQLALCHEMY_TRACK_MODIFICATIONS=False
         )
+    app.config["SWAGGER"] = {
+        "title": "Gym Workout API",
+        "openapi": "3.0.3",
+        "uiversion": 3,
+    }
+    swagger = Swagger(app, template_file="doc/documentation.yml")
 
     if test_config is None:
         app.config.from_pyfile("config.py", silent=True)
