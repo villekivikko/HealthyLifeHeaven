@@ -1,0 +1,291 @@
+---
+openapi: 3.0.3
+servers:
+- url: /api
+info:
+  title: Gym Workout API
+  version: 0.0.1
+  description: |
+    This is an API implemented in the Programmable Web Project course.
+    It stores data about workouts.
+components:
+  parameters:
+    user:
+      description: Current user's unique username
+      in: path
+      name: user
+      required: true
+      schema:
+        type: string
+    workout:
+      description: Current user's logged workout
+      in: path
+      name: workout
+      required: true
+      schema:
+        type: string
+    movement:
+      description: Current user's logged movements in a workout
+      in: path
+      name: movement
+      required: true
+      schema:
+        type: string
+  schemas:
+    User:
+      properties:
+        height:
+          description: Height of the user 
+          type: number
+        username:
+          description: User's username
+          type: string
+        weight:
+          description: Weight of the user
+          type: number
+      required:
+      - username
+      - height
+      - weight
+      type: object
+    Workout:
+      properties:
+        favorite:
+          description: Workout is either user's favorite or not
+          type: boolean
+        workout_name:
+          description: Name of the workout
+          type: string
+      required:
+      - workout_name
+      - favorite
+      type: object
+    Movement:
+      properties:
+        movement_name:
+          description: Name of the movement
+          type: string
+        reps:
+          description: The number of repetitions
+          type: integer
+        sets:
+          description: The number of sets
+          type: integer
+      required:
+      - movement_name
+      - sets
+      - reps
+      type: object
+paths:
+  /users/:
+    get:
+      description: Retrieve a list of users
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              example:
+              - username: test_user1
+                height: 170.0
+                weight: 70.0
+              - username: test_user2
+                height: 180.0
+                weight: 80.0
+    post:
+      description: Create a new user
+      requestBody:
+        description: JSON document that contains basic data for a new user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+            example:
+              username: user1
+              height: 170.2
+              weight: 74.45
+      responses:
+        '201':
+          description: The user was created successfully
+        '400':
+          description: Request body was not valid
+        '409':
+          description: User with same username already exists
+        '415':
+          description: Media type was not JSON
+  /users/{user}/:
+    parameters:
+    - $ref: '#/components/parameters/user'
+    get:
+      description: Get details of one user
+      responses:
+        '200':
+          description: Details of single user
+          content:
+            application/json:
+              examples:
+                current-user:
+                  description: Current user
+                  value:
+                    username: test_user1
+                    height: 170.0
+                    weight: 70.0
+        '404':
+          description: The user was not found
+    put:
+      description: Update user data
+      requestBody:
+        description: JSON document that contains basic data for the new user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+            example:
+              username: new_test_user1
+              height: 175.0
+              weight: 75.0
+      responses: 
+        '201':
+          description: The user's data was updated succesfully
+        '415':
+          description: Media type was not JSON
+        '404':
+          description: The user was not found
+        '400':
+          description: The request body was not valid
+    delete:
+      description: Delete selected user
+      responses:
+        '204':
+          description: User was successfully deleted
+        '404':
+          description: The user was not found
+
+  /users/{user}/workouts/:
+    parameters:
+      - $ref: '#/components/parameters/user'
+    get:
+      description: Retrieve the collection of workouts for current user
+      responses:
+        '200':
+          description: List of workouts
+          content:
+            application/json:
+              example:
+              - workout_name: test_workout1
+                favorite: True
+              - workout_name: test_workout2
+                favorite: False
+    post:
+      description: Create a new workout for current user
+      requestBody:
+        description: JSON document that contains basic data for a new workout
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Workout'
+            example:
+              workout_name: workout1
+              favorite: False
+      responses:
+        '201':
+          description: The workout was created successfully
+        '400':
+          description: Request body was not valid
+        '409':
+          description: Duplicate workout
+        '415':
+          description: Media type was not JSON
+  /users/{user}/workouts/{workout}/:
+    parameters:
+    - $ref: '#/components/parameters/user'
+    - $ref: '#/components/parameters/workout'
+    get:
+      description: Get details of one workout
+      responses:
+        '200':
+          description: Details of single workout
+          content:
+            application/json:
+              examples:
+                current-workout:
+                  description: Current workout
+                  value:
+                    workout_name: test_workout1
+                    favorite: True
+        '404':
+          description: The workout was not found
+    post:
+      description: Create a new movement for current workout
+      requestBody:
+        description: JSON document that contains basic data for a new movement
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Movement'
+            example:
+              movement_name: movement1
+              sets: 3
+              reps: 12
+      responses:
+        '201':
+          description: The movement was created successfully
+        '400':
+          description: Request body was not valid
+        '409':
+          description: Duplicate movement
+        '415':
+          description: Media type was not JSON
+    put:
+      description: Update workout data
+      requestBody:
+        description: JSON document that contains basic data for the updated workout
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Workout'
+            example:
+              workout_name: new_test_workout1
+              favorite: False
+      responses: 
+        '201':
+          description: The workout's data was updated succesfully
+        '415':
+          description: Media type was not JSON
+        '404':
+          description: The workout was not found
+        '400':
+          description: The request body was not valid
+    delete:
+      description: Delete selected workout
+      responses:
+        '201':
+          description: Workout was successfully deleted
+        '404':
+          description: The workout was not found
+  /users/{user}/workouts/{workout}/{movement}/:
+    parameters:
+    - $ref: '#/components/parameters/user'
+    - $ref: '#/components/parameters/workout'
+    - $ref: '#/components/parameters/movement'
+    get:
+      description: Get details of one movement 
+      responses:
+        '200':
+          description: Details of single movement
+          content:
+            application/json:
+              example:
+                movement_name: test_movement1
+                sets: 2
+                reps: 10  
+        '404':
+          description: The movement was not found
+    delete:
+      description: Deletes a movement
+      responses:
+        '204':
+          description: Movement was succesfully deleted
+        '404':
+          description: Movement was not found
+    

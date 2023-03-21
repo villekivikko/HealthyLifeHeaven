@@ -8,3 +8,7 @@ jsonschema
 pytest
 pytest-cov
 pylint
+
+# For the documentation
+flasgger
+pyyaml
