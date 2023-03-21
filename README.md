@@ -30,4 +30,5 @@ Check code quality (pylint):
   - pylint gymworkoutapi --disable=no-member,import-outside-toplevel,no-self-use
 
 Test documentation with Swagger: 
-- localhost:5000/apidocs/
+- flask run
+- on your browser go to: localhost:5000/apidocs/
