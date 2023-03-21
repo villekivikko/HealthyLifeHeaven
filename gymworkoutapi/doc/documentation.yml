@@ -196,6 +196,8 @@ paths:
           description: Duplicate workout
         '415':
           description: Media type was not JSON
+        '404':
+          description: User was not found
   /users/{user}/workouts/{workout}/:
     parameters:
     - $ref: '#/components/parameters/user'
@@ -214,7 +216,7 @@ paths:
                     workout_name: test_workout1
                     favorite: True
         '404':
-          description: The workout was not found
+          description: The workout or user was not found
     post:
       description: Create a new movement for current workout
       requestBody:
@@ -236,6 +238,8 @@ paths:
           description: Duplicate movement
         '415':
           description: Media type was not JSON
+        '404':
+          description: The workout or user was not found
     put:
       description: Update workout data
       requestBody:
